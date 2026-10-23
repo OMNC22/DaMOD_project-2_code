@@ -5,7 +5,6 @@ Created on Thu Oct  1 13:32:16 2026
 
 @author: Oski
 """
-
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -34,6 +33,7 @@ gw.head()
 
 gw_pd = pd.DataFrame(data = gw)
 
+##################################PART 2 GWL TIME SERIES ###################################
 
 #EXPLORING THE DATA SET
 #plotting time series
@@ -135,26 +135,31 @@ print()
 plt.plot(first_order_gw)
 plt.xlabel("Time(years)")
 plt.ylabel("Differenced discharge")
+plt.title("1st order differencing (D) of groundwater series")
 plt.show()
 
 #Autocorrelation 
 plot_acf(gw_pd.gwl, lags = 180)
 plot_acf(first_order_gw, lags = 180)
 
-plot_acf(gw_pd.gwl, lags = 10)
-plot_acf(first_order_gw, lags = 10)
+plot_acf(gw_pd.gwl, lags = 50, title= "Original ACF")
+plot_acf(first_order_gw, lags = 25, title= "1st order D ACF")
 
 
 
 #Partial Autocorrelation
-plot_pacf(gw_pd.gwl, lags = 10)
-plot_pacf(first_order_gw, lags = 10)
+plot_pacf(gw_pd.gwl, lags = 10, title= "Original PACF")
+plot_pacf(first_order_gw, lags = 10, title= "1st order PACF")
+
+
+
+##################################PART 3 ARIMA AND SARIMA###################################
 
 #Running the ARIMA model 
-model = ARIMA(gw, order=(3,1,2)) # setup the ARIMA model object
-model_fit= model.fit() #fit the model to the gw-data
-print(model_fit.summary()) # print out the summary of the model fitting process
-gw_fit = model_fit.fittedvalues # extract modelled gw-leve
+model = ARIMA(gw, order=(3,1,2)) 
+model_fit= model.fit() 
+print(model_fit.summary()) 
+gw_fit = model_fit.fittedvalues 
 
 
 gw_fit_fix =gw_fit.loc["2002-01-01" : "2016-10-01"]
@@ -165,8 +170,8 @@ plt.ylim([391.8,397.2])
 plt.show()
 
 plt.figure(figsize=(12,5))
-plt.plot(gw_pd.gwl,'o--', label='Observed', color='gray')
-plt.plot(gw_fit, label="ARIMA fit",ls='--', color="C2", linewidth=2)
+plt.plot(gw_pd.gwl,'o--', label='Observed', color='grey')
+plt.plot(gw_fit, label="ARIMA fit",ls='--', color="red", linewidth=2)
 
 plt.xlabel("Date")
 plt.ylabel("Groundwater Level")
@@ -182,9 +187,9 @@ fc_95 = forecast.conf_int(alpha=0.05)
 fc_80 = forecast.conf_int(alpha = 0.2)
 
 plt.figure(figsize=(12,5))
-plt.plot(gw_pd.gwl,'o--', label='Observed', color='gray')
-plt.plot(gw_fit, label="ARIMA fit",ls='--', color="C2", linewidth=2)
-plt.plot(fc_mean.index, fc_mean, 'o--', label = "Forecast", color = 'red')
+plt.plot(gw_pd.gwl,'o--', label='Observed', color='grey')
+plt.plot(gw_fit, label="ARIMA fit",ls='--', color="red", linewidth=2)
+plt.plot(fc_mean.index, fc_mean, 'o--', label = "Forecast", color = 'blue')
 plt.fill_between(fc_95.index, fc_95.iloc[:,0], fc_95.iloc[:,1], label = "95% CI", color = 'orange', alpha = 0.3)
 plt.fill_between(fc_80.index, fc_80.iloc[:,0], fc_80.iloc[:,1], label = "80% CI",  color = 'blue', alpha = 0.1)
 
@@ -211,10 +216,10 @@ fc_ci_95_sarima_1 = forecast_sarima_1.conf_int(alpha=0.05)   # 95% Confidence In
 fc_ci_80_sarima_1 = forecast_sarima_1.conf_int(alpha=0.2) 
 
 plt.figure(figsize=(12,5))
-plt.plot(gw,'o--', label='Observed', color='gray')
-plt.plot(gw_fit_sarima_1, label="SARIMA fit",ls='--', color="C2", linewidth=2)
-plt.plot(fc_sarima_1.index, fc_sarima_1, 'o--',label='SARIMA Forecast', color='red')
-plt.plot(fc_mean.index, fc_mean, 'o--',label='ARIMA Forecast', color='darkred')
+plt.plot(gw,'o--', label='Observed', color='grey')
+plt.plot(gw_fit_sarima_1, label="SARIMA fit",ls='--', color="red", linewidth=2)
+plt.plot(fc_sarima_1.index, fc_sarima_1, 'o--',label='SARIMA Forecast', color='orange')
+plt.plot(fc_mean.index, fc_mean, 'o--',label='ARIMA Forecast', color='blue')
 plt.fill_between(fc_ci_95_sarima_1.index, fc_ci_95_sarima_1.iloc[:,0], fc_ci_95_sarima_1.iloc[:,1], color='pink', alpha=0.3,label='95% CI')
 
 plt.xlabel("Date")
@@ -245,10 +250,10 @@ fc_ci_80_sarima_2 = forecast_sarima_2.conf_int(alpha=0.2)
 
 
 plt.figure(figsize=(12,5))
-plt.plot(gw_train,'o--', label='Observed (trained)', color='gray')
-plt.plot(gw_test,'o--', label='Observed (test)', color='k')
-plt.plot(gw_fit_sarima_2, label="SARIMA fit",ls='--', color="C2", linewidth=2)
-plt.plot(fc_sarima_2.index, fc_sarima_2, 'o--',label='SARIMA Forecast', color='red')
+plt.plot(gw_train,'o--', label='Observed (trained)', color='grey')
+plt.plot(gw_test,'o--', label='Observed (test)', color='black')
+plt.plot(gw_fit_sarima_2, label="SARIMA fit",ls='--', color="red", linewidth=2)
+plt.plot(fc_sarima_2.index, fc_sarima_2, 'o--',label='SARIMA Forecast', color='orange')
 plt.fill_between(fc_ci_95_sarima_2.index, fc_ci_95_sarima_2.iloc[:,0], fc_ci_95_sarima_2.iloc[:,1], color='pink', alpha=0.3,label='95% CI')
 
 plt.xlabel("Date")
@@ -285,8 +290,8 @@ plt.figure(figsize=(12, 5))
 
 plt.plot(gw_train_12,'o--',label='Observed (trained)',color='gray')
 plt.plot(gw_test_12,'o--',label='Observed (test)', color='black')
-plt.plot(gw_fit_sarima_12,'--',label='SARIMA fit',color='C2',linewidth=2)
-plt.plot(fc_sarima_12.index,fc_sarima_12,'o--',label='SARIMA forecast',color='red')
+plt.plot(gw_fit_sarima_12,'--',label='SARIMA fit',color='red',linewidth=2)
+plt.plot(fc_sarima_12.index,fc_sarima_12,'o--',label='SARIMA forecast',color='orange')
 
 plt.fill_between(fc_ci_95_sarima_12.index,fc_ci_95_sarima_12.iloc[:, 0],
     fc_ci_95_sarima_12.iloc[:, 1],color='pink',alpha=0.3,label='95% CI')
@@ -301,8 +306,8 @@ plt.grid(True)
 #comparing 12 month vs 24 month 
 plt.figure(figsize=(12, 5))
 plt.plot(gw_test,'o--',lw=2,label='Observed (test)',color='black')
-plt.plot(fc_sarima_2,'o--',lw=2,label='SARIMA forecast 24 month',color='red')
-plt.plot(fc_sarima_12,'o--',lw=2,label='SARIMA forecast 12 month',color='green')
+plt.plot(fc_sarima_2,'o--',lw=2,label='SARIMA forecast 24 month',color='blue')
+plt.plot(fc_sarima_12,'o--',lw=2,label='SARIMA forecast 12 month',color='orange')
 
 plt.xlabel("Date")
 plt.ylabel("Groundwater Level")
@@ -313,10 +318,10 @@ plt.savefig('gw_sarima_12vs24.png',dpi=300)
 
 
 
-#Refining model 
 
+###############################MODEL REFINEMENT###########################
 
-##Original model 
+##Original model############### 
 seasonal_order = (0,1,1,12)
 sarima_1_model = ARIMA(gw, order=(3,1,2),seasonal_order = seasonal_order
 )
@@ -324,7 +329,7 @@ sarima_1_model_fit = sarima_1_model.fit()
 print(sarima_1_model_fit.summary())
 
 
-##3rd model 
+##3rd model################### 
 seasonal_order = (0,1,1,12)
 sarima_3_model = ARIMA(gw, order=(3,1,1),seasonal_order = seasonal_order
 )
@@ -335,7 +340,7 @@ model_sarima_3 = ARIMA(gw_train, order=(3,1,1), seasonal_order=seasonal_order)
 modelfit_sarima_3 = model_sarima_3.fit()
 print(modelfit_sarima_3.summary())
 
-##4th model
+##4th model########################
 seasonal_order = (0,1,1,12)
 sarima_4_model = ARIMA(gw, order=(2,1,1),seasonal_order = seasonal_order
 )
@@ -351,14 +356,14 @@ print(sarima_4_model_fit.summary())
 
 gw_fit_sarima_4 = sarima_4_model_fit.fittedvalues
 
-#####4th model preformance
+##4th model preformance
 
 model_sarima_4 = ARIMA(gw_train, order=(2,1,1), seasonal_order=seasonal_order)
 modelfit_sarima_4 = model_sarima_4.fit()
 print(modelfit_sarima_4.summary())
 
 
-##5th model 
+##5th model########################## 
 seasonal_order = (0,1,1,12)
 sarima_5_model = ARIMA(gw, order=(1,1,1),seasonal_order = seasonal_order
 )
@@ -369,7 +374,7 @@ model_sarima_5 = ARIMA(gw_train, order=(1,1,1), seasonal_order=seasonal_order)
 modelfit_sarima_5 = model_sarima_5.fit()
 print(modelfit_sarima_5.summary())
 
-##6th model
+##6th model##########################
 seasonal_order = (0,1,1,12)
 sarima_6_model = ARIMA(gw, order=(0,1,1),seasonal_order = seasonal_order
 )
@@ -381,7 +386,7 @@ modelfit_sarima_6 = model_sarima_6.fit()
 print(modelfit_sarima_6.summary())
 
 
-##7thmodel Right one 
+##7thmodel Right one#################### 
 seasonal_order = (0,1,1,12)
 sarima_7_model = ARIMA(gw, order=(1,2,1),seasonal_order = seasonal_order
 )
@@ -411,7 +416,7 @@ plt.grid(True)
 
 
 
-##8thmodel TOO FAR
+##8thmodel TOO FAR########################################
 seasonal_order = (0,1,1,12)
 sarima_8_model = ARIMA(gw, order=(2,1,1),seasonal_order = seasonal_order
 )

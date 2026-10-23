@@ -41,7 +41,7 @@ discharge_na = discharge.isna().sum()
 discharge_na.to_frame('Missing values')
 
 
-#------------------------Part 1----------------------------#
+#-------------------------------------------Part 1----------------------------#
 
 #VISUAL INSPECTION#
     #plotting timeseries 
@@ -113,7 +113,7 @@ plt.ylabel("Discharge m3 d-1" )
 plt.title("Discharge time series")
 plt.show()
 
-
+#------------------------------------Part 2---------------------------------
 #PERIODOGRAM 
 Q_flat = discharge.obs.values - discharge.obs.mean()
 freq, power = periodogram(Q_flat, fs=1)
@@ -132,11 +132,11 @@ plot_acf(discharge.obs, lags = 30)
 #PACF
 plot_pacf(discharge.obs, lags = 6)
 
+
+#------------------------------------Part 3---------------------------------
 #Seaonal decomp
 q_decompose = seasonal_decompose(discharge.obs, period=365)
 fig =q_decompose.plot()
-
-
 
 resid_line = fig.axes[-1].lines[0]  
 resid_line.set_marker(".")
@@ -145,7 +145,7 @@ resid_line.set_markersize(2)
 plt.tight_layout()
 plt.show()
 
-
+#------------------------------------Part 4---------------------------------
 #fitting an AR model 
 model_AR = AutoReg(discharge.obs, lags= 3)
 results_AR = model_AR.fit()
